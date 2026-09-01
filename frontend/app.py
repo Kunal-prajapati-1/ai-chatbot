@@ -1,14 +1,30 @@
 import streamlit as st
 import requests as req
 import os
+
+
+# -----------------------------
+# Page configuration
+# -----------------------------
+
+st.set_page_config(
+    page_title="My AI Chatbot",
+    page_icon="🤖"
+)
+
 st.title("🤖 My AI Chatbot")
 
+
+# -----------------------------
 # Backend URL
+# -----------------------------
+
 BACKEND_URL = os.getenv(
     "BACKEND_URL",
-    "http://127.0.0.1:8000/"
-)
-st.write("backend_Url", BACKEND_URL)
+    "http://127.0.0.1:8000"
+).rstrip("/")
+
+
 # -----------------------------
 # Chat history
 # -----------------------------
@@ -17,6 +33,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 
+# Display previous messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -65,30 +82,37 @@ if prompt:
     with st.chat_message("assistant"):
 
         with st.spinner("Thinking..."):
-            response = req.post(
-    f"{BACKEND_URL}chat",
-    json={
-        "message": prompt
-    },
-    timeout=60
-)
 
-            st.write("Status:", response.status_code)
-            st.write("Response:", response.text)
+            try:
+                response = req.post(
+                    f"{BACKEND_URL}/chat",
+                    json={
+                        "message": prompt
+                    },
+                    timeout=60
+                )
 
-            response.raise_for_status()
+                response.raise_for_status()
 
-            data = response.json()
-            answer = data["response"]
+                data = response.json()
 
-            st.markdown(answer)
+                answer = data["response"]
+
+                st.markdown(answer)
+
+            except req.exceptions.RequestException as e:
+                st.error("Unable to connect to the backend.")
+
+            except (ValueError, KeyError):
+                st.error("Invalid response received from the backend.")
 
 
     # -----------------------------
     # Save assistant response
     # -----------------------------
 
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": answer
-    })
+    if "answer" in locals():
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": answer
+        })
