@@ -1,8 +1,13 @@
 import streamlit as st
 import requests as req
- 
+import os
 st.title("🤖 My AI Chatbot")
 
+# Backend URL
+BACKEND_URL = os.getenv(
+    "BACKEND_URL",
+    "http://127.0.0.1:8000"
+)
 
 # -----------------------------
 # Chat history
@@ -60,13 +65,12 @@ if prompt:
     with st.chat_message("assistant"):
 
         with st.spinner("Thinking..."):
-
             response = req.post(
-                "http://127.0.0.1:8000/chat",
+                f"{BACKEND_URL}/chat",
                 json={
                     "message": prompt
                 }
-            )
+)
 
             data = response.json()
 
