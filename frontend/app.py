@@ -8,7 +8,7 @@ BACKEND_URL = os.getenv(
     "BACKEND_URL",
     "http://127.0.0.1:8000"
 )
-
+st.write("backend_Url", BACKEND_URL)
 # -----------------------------
 # Chat history
 # -----------------------------
@@ -66,14 +66,19 @@ if prompt:
 
         with st.spinner("Thinking..."):
             response = req.post(
-                f"{BACKEND_URL}/chat",
-                json={
-                    "message": prompt
-                }
+    f"{BACKEND_URL}/chat",
+    json={
+        "message": prompt
+    },
+    timeout=60
 )
 
-            data = response.json()
+            st.write("Status:", response.status_code)
+            st.write("Response:", response.text)
 
+            response.raise_for_status()
+
+            data = response.json()
             answer = data["response"]
 
             st.markdown(answer)
