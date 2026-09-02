@@ -89,7 +89,7 @@ if prompt:
                     json={
                         "message": prompt
                     },
-                    timeout=60
+                    timeout=120
                 )
 
                 response.raise_for_status()
